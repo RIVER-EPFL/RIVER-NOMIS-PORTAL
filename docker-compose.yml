@@ -1,0 +1,33 @@
+version: "3"
+services:
+  traefik:
+    container_name: traefik
+    image: traefik:v2.9.6
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+    networks:
+      - web
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+
+  nomis-portal:
+    container_name: nomis-portal
+    # image: rocker/shiny:4.2.2
+    build:
+      context: .
+      dockerfile: Dockerfile
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nomis_portal.rule=Host(`nomis.local`)"
+      - "traefik.http.services.nomis_portal.loadbalancer.server.port=3838"
+    networks:
+      - web
+
+networks:
+  web:
+    driver: bridge
