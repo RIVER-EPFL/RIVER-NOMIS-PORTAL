@@ -56,9 +56,8 @@ source('./modules/protocols_tab/protocols_tab.R')
 source('./utils/helper_expedition.R')
 
 
-source('app_config.R')
 
-if (ENV == 'development') {
+if (Sys.getenv("NOMIS_ENV") == 'development') {
     # Compile CSS from Sass
     sass::sass(
         sass::sass_file('assets/sass/main.scss'), 
@@ -70,14 +69,16 @@ if (ENV == 'development') {
 }
 
 options(shiny.maxRequestSize=100*1024^2)
+options(shiny.port = 3838)
+options(shiny.host = '0.0.0.0')
 
 pool <- dbPool(
     drv = RMySQL::MySQL(),
-    dbname = DB_NAME,
-    host = HOSTNAME,
-    port = DB_PORT,
-    username = USERNAME,
-    password = PASSWORD)
+    dbname = Sys.getenv("NOMIS_DB_NAME"),
+    host = Sys.getenv("NOMIS_DB_HOSTNAME"),
+    port = strtoi(Sys.getenv("NOMIS_DB_PORT")),
+    username = Sys.getenv("NOMIS_DB_USERNAME"),
+    password = Sys.getenv("NOMIS_DB_PASSWORD"))
 
 # Define UI for application that draws a histogram
 ui <- tagList(
@@ -122,7 +123,7 @@ ui <- tagList(
         ),
         
         # Add footer to navbarPageWithWrapper
-        footer = htmlTemplate('html_components/footer.html',
+        footer = htmlTemplate('./html_components/footer.html',
                               creditsLink = actionLink('credits','Credits & Source code'))
     )
 )

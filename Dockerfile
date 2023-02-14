@@ -61,22 +61,25 @@ RUN apt-get install -y mysql-client libmysqlclient-dev
 RUN apt-get install -y libxml2-dev openssl libcurl4-openssl-dev
 
 # Copy nomis directory and install R dependencies
+WORKDIR /
+COPY app /app
+COPY packages_installation_fixedversions.R /app
+
 WORKDIR /app
-COPY ./ ./
-ENV MAKE="make -j12"
+ARG MAKE="make -j12"
 
-# Set environment variables for R application by creating app_config.R
-ARG RSHINY_ENVIRONMENT=production
-ARG DB_NAME=db_name
-ARG DB_HOSTNAME=host_address
-ARG DB_PORT=3306
-ARG DB_USERNAME=username
-ARG DB_PASSWORD=password
-RUN echo "ENV <- $RSHINY_ENVIRONMENT\n" \
-         "DB_NAME  <- $DB_NAME\n" \
-         "HOSTNAME <- $DB_HOSTNAME\n" \
-         "DB_PORT <- $DB_PORT\n" \
-         "USERNAME <- $DB_USERNAME\n" \
-         "PASSWORD <- $DB_PASSWORD" > app_config.R
+# # Set environment variables for R application by creating app_config.R
+# ENV NOMIS_ENV=production
+# ENV NOMIS_DB_NAME=db_name
+# ENV NOMIS_DB_HOSTNAME=host_address
+# ENV NOMIS_DB_PORT=3306
+# ENV NOMIS_DB_USERNAME=username
+# ENV NOMIS_DB_PASSWORD=password
 
-# RUN R -f packages_installation_fixedversions.R
+# Install packages from fixed versions
+RUN R -f packages_installation_fixedversions.R
+
+# Compile the RShiny environment
+RUN R -f assets_compilation.R
+
+ENTRYPOINT ["R", "-f", "app.R"]

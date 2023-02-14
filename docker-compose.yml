@@ -14,10 +14,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
 
-
   nomis-portal:
-    container_name: nomis-portal
-    # image: rocker/shiny:4.2.2
+  # image: nomis:latest
     build:
       context: .
       dockerfile: Dockerfile
@@ -25,8 +23,39 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.nomis_portal.rule=Host(`nomis.local`)"
       - "traefik.http.services.nomis_portal.loadbalancer.server.port=3838"
+    environment:
+      NOMIS_DB_HOSTNAME: nomis-db
+      NOMIS_DB_PORT: 3306
+      NOMIS_DB_USERNAME: nomis_portal
+      NOMIS_DB_PASSWORD: nomis
+      NOMIS_DB_NAME: nomis_db
     networks:
       - web
+    ports:
+      - "3838:3838"
+    volumes:
+      - ./app:/app
+    depends_on:
+      - nomis-db
+  #   # image: rocker/shiny:4.2.2
+
+  nomis-db:
+    image: mariadb:10.2.41
+    # container_name: mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: nomisroot
+      MYSQL_DATABASE: nomis_db
+      MYSQL_USER: nomis_portal
+      MYSQL_PASSWORD: nomis
+    ports:
+      - 3306:3306
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    networks:
+      - web
+
+volumes:
+  mariadb-data:
 
 networks:
   web:

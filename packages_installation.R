@@ -1,9 +1,10 @@
 install.packages(
-  pkgs = c("shiny", 
-           "shinyjs", 
-           "shinyWidgets", 
-           "shinybusy", 
-           "shinycssloaders", 
+  pkgs = c(
+#   "shiny",
+           "shinyjs",
+           "shinyWidgets",
+           "shinybusy",
+           "shinycssloaders",
            "remotes",
            "sass", 
            "jsonlite", 
@@ -38,7 +39,8 @@ install.packages(
            "waiter",
            "hrbrthemes"
   ),
-  repos = 'https://cran.rstudio.com/'
+  repos = 'https://cran.rstudio.com/',
+  Ncpus = 6
 )
 
 remotes::install_github("rstudio/shinyvalidate")
