@@ -61,8 +61,8 @@ source('app_config.R')
 if (ENV == 'development') {
     # Compile CSS from Sass
     sass::sass(
-        sass::sass_file('assets/sass/main.scss'),
-        output = 'www/main.css',
+        sass::sass_file('./assets/sass/main.scss'),
+        output = './www/main.css',
         options = sass::sass_options(output_style = 'compressed')
     )
     # Compile and minify JavaScript
@@ -78,61 +78,6 @@ pool <- dbPool(
     port = DB_PORT,
     username = USERNAME,
     password = PASSWORD)
-
-# pool <- dbPool(# Define UI for application that draws a histogram
-ui <- tagList(
-    # Load shinyjs
-    useShinyjs(),
-    # Add stylesheet link and script tags to head
-    tags$head(
-        # Add link to main.css stylesheet
-        tags$link(href = 'main.css', rel = 'stylesheet', type = 'text/css'),
-        # Add link for js script
-        tags$script(src = 'nomisportal.js')
-    ),
-    # Add a class to the body element to keep the footer at the bottom of the page
-    tags$body(class = 'footer-to-bottom-container'),
-    # Create the navbarPage using custom function to add a content-wrapper (defined in './utils/shiny_extensions.R')
-    navbarPageWithWrapper(
-        # Create Navabar page with login
-        withLoginAction(
-        # Pass in the output of shiny navbarPage()
-        navbarPage(
-            id = 'main-nav',
-            # Load the custom logo for the navbar title
-            htmlTemplate('./html_components/logo.html'),
-
-            # Set a window browser window title
-            windowTitle = 'NOMIS DATA PORTAL',
-            # Create the home tab
-            tabPanel(
-                # Create a tab title with an icon
-                tags$span(icon('home'),tags$span('Home', class = 'navbar-menu-name')),
-                # Load the home page template with some icons
-                htmlTemplate(
-                    './html_components/home.html',
-                    dlTabLink = actionLink('aboutDlLink', 'Download tab'),
-                    extLinkIcon = icon('external-link-alt', class = 'ext-link')
-                ),
-                value = 'aboutTab'
-            )
-        ),
-        # Add the login module UI
-        loginUI('login')
-        ),
-
-        # Add footer to navbarPageWithWrapper
-        footer = htmlTemplate('html_components/footer.html',
-                              creditsLink = actionLink('credits','Credits & Source code'))
-    )
-)
-
-#     drv = RMySQL::MySQL(),
-#     dbname = "nomis_db",
-#     host = "nomis-db",
-#     port = 3306,
-#     username = "nomis_portal",
-#     password = "nomis")
 
 # Define UI for application that draws a histogram
 ui <- tagList(
@@ -188,10 +133,10 @@ server <- function(input, output, session) {
      user <- callModule(login, 'login', pool)
     dimension <- reactive({input$dimension})
 
-    
+
     observeEvent(user$role, {
-        
-        
+
+
         if(user$role %in% c('sber', 'admin','intern')){
             appendTab(
                 'main-nav',
@@ -203,7 +148,7 @@ server <- function(input, output, session) {
                 )
             )
             callModule(visualisationTab,"visualisation",pool)
-            
+
             appendTab(
                 'main-nav',
                 tabPanel(
@@ -212,9 +157,9 @@ server <- function(input, output, session) {
                     progressTabUI('progress')
                 )
             )
-            
+
             callModule(progressTab,"progress",pool)
-            
+
             appendTab(
                 'main-nav',
                 # Create the visualisation tab
@@ -226,7 +171,7 @@ server <- function(input, output, session) {
             )
             callModule(protocolsTab,"protocols",pool)
         }
-        
+
         if (user$role %in% c('sber', 'admin')) {
             appendTab(
                 'main-nav',
@@ -238,7 +183,7 @@ server <- function(input, output, session) {
                     uploadTabUI('upload',pool)
                 )
             )
-            
+
             callModule(uploadTab,"upload",pool,dimension)
             ## Generate dataManagementTab #################################################
             # Create the data management tab
@@ -253,7 +198,7 @@ server <- function(input, output, session) {
             )
             # Load data management server logic
             callModule(managementTab,"management",pool,dimension)
-            
+
         }
         if (user$role %in% c('sber', 'admin','intern')) {
 
@@ -270,7 +215,7 @@ server <- function(input, output, session) {
             )
             callModule(downloadTab,"download",pool)
         }
-        
+
         if (user$role == 'admin') {
             ## Generate usersTab ##########################################################
             # Create users tab
@@ -287,7 +232,7 @@ server <- function(input, output, session) {
             callModule(portalTab, 'portal', pool)
         }
     })
-    
+
     observeEvent(input$credits, ignoreInit = TRUE, {
         showModal(modalDialog(
             htmlTemplate(
@@ -301,7 +246,7 @@ server <- function(input, output, session) {
 
 shinyApp(ui, server, onStart = function() {
     cat("Doing application setup\n")
-    
+
     onStop(function() {
         cat("Doing application cleanup\n")
         poolClose(pool)

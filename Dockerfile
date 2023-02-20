@@ -45,6 +45,18 @@ ARG MAKE="make -j2"
 WORKDIR /srv/shiny-server/
 RUN R -f packages_installation_fixedversions.R
 
+# Set runtime environment vars (that build the app_config.R in the start.sh file at runtime)
+ENV NOMIS_ENV=$NOMIS_ENV
+ENV NOMIS_DB_NAME=$NOMIS_DB_NAME
+ENV NOMIS_DB_HOSTNAME=$NOMIS_DB_HOSTNAME
+ENV NOMIS_DB_PORT=$NOMIS_DB_PORT
+ENV NOMIS_DB_USERNAME=$NOMIS_DB_USERNAME
+ENV NOMIS_DB_PASSWORD=$NOMIS_DB_PASSWORD
+
+# Install fonts
+RUN apt-get install -y fonts-roboto
+RUN R -e 'hrbrthemes::import_roboto_condensed()'
+
 # Copy the rest of the application. Doing it in this order allows changes to the app folder
 # without invoking a package rebuild
 COPY ./app/ ./
@@ -53,13 +65,6 @@ RUN chown -R shiny:shiny /srv/shiny-server/
 
 # Build program assets
 RUN R -f assets_compilation.R
-
-ENV NOMIS_ENV=$NOMIS_ENV
-ENV NOMIS_DB_NAME=$NOMIS_DB_NAME
-ENV NOMIS_DB_HOSTNAME=$NOMIS_DB_HOSTNAME
-ENV NOMIS_DB_PORT=$NOMIS_DB_PORT
-ENV NOMIS_DB_USERNAME=$NOMIS_DB_USERNAME
-ENV NOMIS_DB_PASSWORD=$NOMIS_DB_PASSWORD
 
 # Run as user shiny instead of root
 USER shiny
