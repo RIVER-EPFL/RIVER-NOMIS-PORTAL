@@ -56,11 +56,12 @@ source('./modules/protocols_tab/protocols_tab.R')
 source('./utils/helper_expedition.R')
 
 
+source('app_config.R')
 
-if (Sys.getenv("NOMIS_ENV") == 'development') {
+if (ENV == 'development') {
     # Compile CSS from Sass
     sass::sass(
-        sass::sass_file('assets/sass/main.scss'), 
+        sass::sass_file('assets/sass/main.scss'),
         output = 'www/main.css',
         options = sass::sass_options(output_style = 'compressed')
     )
@@ -69,16 +70,69 @@ if (Sys.getenv("NOMIS_ENV") == 'development') {
 }
 
 options(shiny.maxRequestSize=100*1024^2)
-options(shiny.port = 3838)
-options(shiny.host = '0.0.0.0')
 
 pool <- dbPool(
     drv = RMySQL::MySQL(),
-    dbname = Sys.getenv("NOMIS_DB_NAME"),
-    host = Sys.getenv("NOMIS_DB_HOSTNAME"),
-    port = strtoi(Sys.getenv("NOMIS_DB_PORT")),
-    username = Sys.getenv("NOMIS_DB_USERNAME"),
-    password = Sys.getenv("NOMIS_DB_PASSWORD"))
+    dbname = DB_NAME,
+    host = HOSTNAME,
+    port = DB_PORT,
+    username = USERNAME,
+    password = PASSWORD)
+
+# pool <- dbPool(# Define UI for application that draws a histogram
+ui <- tagList(
+    # Load shinyjs
+    useShinyjs(),
+    # Add stylesheet link and script tags to head
+    tags$head(
+        # Add link to main.css stylesheet
+        tags$link(href = 'main.css', rel = 'stylesheet', type = 'text/css'),
+        # Add link for js script
+        tags$script(src = 'nomisportal.js')
+    ),
+    # Add a class to the body element to keep the footer at the bottom of the page
+    tags$body(class = 'footer-to-bottom-container'),
+    # Create the navbarPage using custom function to add a content-wrapper (defined in './utils/shiny_extensions.R')
+    navbarPageWithWrapper(
+        # Create Navabar page with login
+        withLoginAction(
+        # Pass in the output of shiny navbarPage()
+        navbarPage(
+            id = 'main-nav',
+            # Load the custom logo for the navbar title
+            htmlTemplate('./html_components/logo.html'),
+
+            # Set a window browser window title
+            windowTitle = 'NOMIS DATA PORTAL',
+            # Create the home tab
+            tabPanel(
+                # Create a tab title with an icon
+                tags$span(icon('home'),tags$span('Home', class = 'navbar-menu-name')),
+                # Load the home page template with some icons
+                htmlTemplate(
+                    './html_components/home.html',
+                    dlTabLink = actionLink('aboutDlLink', 'Download tab'),
+                    extLinkIcon = icon('external-link-alt', class = 'ext-link')
+                ),
+                value = 'aboutTab'
+            )
+        ),
+        # Add the login module UI
+        loginUI('login')
+        ),
+
+        # Add footer to navbarPageWithWrapper
+        footer = htmlTemplate('html_components/footer.html',
+                              creditsLink = actionLink('credits','Credits & Source code'))
+    )
+)
+
+#     drv = RMySQL::MySQL(),
+#     dbname = "nomis_db",
+#     host = "nomis-db",
+#     port = 3306,
+#     username = "nomis_portal",
+#     password = "nomis")
 
 # Define UI for application that draws a histogram
 ui <- tagList(
@@ -102,7 +156,7 @@ ui <- tagList(
             id = 'main-nav',
             # Load the custom logo for the navbar title
             htmlTemplate('./html_components/logo.html'),
-            
+
             # Set a window browser window title
             windowTitle = 'NOMIS DATA PORTAL',
             # Create the home tab
@@ -121,7 +175,7 @@ ui <- tagList(
         # Add the login module UI
         loginUI('login')
         ),
-        
+
         # Add footer to navbarPageWithWrapper
         footer = htmlTemplate('./html_components/footer.html',
                               creditsLink = actionLink('credits','Credits & Source code'))
