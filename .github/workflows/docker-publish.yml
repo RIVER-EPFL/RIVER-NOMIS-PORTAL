@@ -1,13 +1,9 @@
 name: Docker
 
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
+# This workflow builds a docker image and pushes it
+# to the github package registry
 
 on:
-  schedule:
-    - cron: '34 21 * * *'
   push:
     branches: [ "master" ]
     # Publish semver tags as releases.
