@@ -35,10 +35,10 @@ RUN apt-get install -y libxml2-dev openssl libcurl4-openssl-dev libssl-dev libxm
 
 # Delete the example application, copy dependency file and install R dependencies
 RUN rm -rf /srv/shiny-server/*
-COPY packages_installation_fixedversions.R /srv/shiny-server/
+COPY packages_installation.R /srv/shiny-server/
 ARG MAKE="make -j2"
 WORKDIR /srv/shiny-server/
-RUN R -f packages_installation_fixedversions.R
+RUN R -f packages_installation.R
 
 # Set runtime environment vars (that build the app_config.R in the start.sh file at runtime)
 ENV NOMIS_ENV=$NOMIS_ENV
