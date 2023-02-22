@@ -11,7 +11,7 @@ www/protocols/*.pdf
 log/
 
 # Config files
-app_config.r
+app_config.*
 
 # History files
 .Rhistory
