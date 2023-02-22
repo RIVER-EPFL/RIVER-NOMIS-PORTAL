@@ -17,7 +17,7 @@ navbarPageWithWrapper <- function(navbarPageOutput, wrapperClass = 'content-wrap
   # navbarPageOutput[[3]][[1]]$children[[1]]$attribs$class <- str_interp('${navbarPageOutput[[3]][[1]]$children[[1]]$attribs$class} ${wrapperClass}')
   # # Add wrapperClass and beforeFooterClass to the content
   # navbarPageOutput[[3]][[2]]$attribs$class <- str_interp('${navbarPageOutput[[3]][[2]]$attribs$class} ${wrapperClass} ${beforeFooterClass}')
-  #
+  # 
   # # If footer is defined, add it after the content
   # if(!is.null(footer)) {
   #   navbarPageOutput[[3]][[length(navbarPageOutput[[3]]) + 1]] <- footer
@@ -29,7 +29,7 @@ navbarPageWithWrapper <- function(navbarPageOutput, wrapperClass = 'content-wrap
   )
   # Add wrapperClass and beforeFooterClass to the content
   navbarPageOutput[[3]][[2]]$attribs$class <- paste(
-    wrapperClass, beforeFooterClass,
+    navbarPageOutput[[3]][[2]]$attribs$class, wrapperClass, beforeFooterClass,
     sep = ' '
   )
   
