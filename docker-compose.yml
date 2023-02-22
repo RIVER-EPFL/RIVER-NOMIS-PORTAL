@@ -23,7 +23,7 @@ services:
       - "traefik.http.routers.nomis_portal.rule=Host(`nomis.local`)"
       - "traefik.http.services.nomis_portal.loadbalancer.server.port=3838"
     environment:
-      NOMIS_ENV: production
+      NOMIS_ENV: prod
       NOMIS_DB_HOSTNAME: nomis-db
       NOMIS_DB_PORT: 3306
       NOMIS_DB_USERNAME: nomis_portal
@@ -35,6 +35,11 @@ services:
       - "3838:3838"
     depends_on:
       - nomis-db
+    volumes:
+      - ./data:/srv/shiny-server/data
+      - ./protocols:/srv/shiny-server/www/protocols
+      - ./db_backups:/srv/shiny-server/db_backups
+      - ./log:/srv/shiny-server/log
 
   nomis-db:
     image: mariadb:10.2.41

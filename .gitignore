@@ -52,3 +52,7 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+# App external folder
+db_backups/
+protocols/
