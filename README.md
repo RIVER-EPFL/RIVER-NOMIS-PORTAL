@@ -10,7 +10,7 @@ Core dependencies and installation steps are defined in the `Dockerfile` assumin
 - Node.js (tested version: 12.18.3)
 - Terser.js (tested version: 5.3.0)
 
-R packages versions are defined in `packages_installation_fixedversions.R`.
+`renv` is used to manage package versions.
 
 ## Getting started
 

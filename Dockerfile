@@ -31,9 +31,8 @@ RUN apt-get update && apt-get install -y tzdata curl lsb-release wget build-esse
 RUN wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc
 RUN add-apt-repository "deb https://cloud.r-project.org/bin/linux/ubuntu $(lsb_release -cs)-cran40/" \
   && apt-get update \
-  && apt-get install -y r-base=4.0.3-1.1804.0 r-recommended=4.0.3-1.1804.0
-
-RUN dpkg-reconfigure -f noninteractive tzdata
+  && apt-get install -y r-base=4.0.3-1.1804.0 r-recommended=4.0.3-1.1804.0 \
+  && dpkg-reconfigure -f noninteractive tzdata
 
 # Install required dependencies for building NodeJS, install NodeJS and Terser and add shiny user
 RUN curl https://nodejs.org/download/release/v12.18.3/node-v12.18.3-linux-x64.tar.gz | tar -zx -C /usr/local --strip-components=1 \
@@ -47,10 +46,8 @@ RUN wget \
   --progress=dot:mega \
   https://download3.rstudio.org/ubuntu-14.04/x86_64/shiny-server-1.5.14.948-amd64.deb \
   && dpkg -i shiny-server-1.5.14.948-amd64.deb \
-  && rm shiny-server-1.5.14.948-amd64.deb
-
-# Setup java configuration in R
-RUN R CMD javareconf
+  && rm shiny-server-1.5.14.948-amd64.deb \
+  && R CMD javareconf
 
 # Delete the example application, copy dependency lock file and install R dependencies
 RUN rm -rf /srv/shiny-server/*
