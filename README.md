@@ -14,14 +14,48 @@ R packages versions are defined in `packages_installation_fixedversions.R`.
 
 ## Getting started
 
-The service can be run locally or within a Docker environment. It requires a MySQL/MariaDB database to support it, and therefore requires the credentials of such a database to exist by supplying environment variables
-
 ### Docker Compose
 
-Using the supplied `docker-compose.yml` file, a nomis portal, mariadb database and Traefik reverse proxy will start, simulating a complete deployment. From the root of the repository, and with Docker and Docker compose set-up, type:
+Using the supplied `docker-compose.yml` file, a nomis portal, MariaDB database and Traefik reverse proxy will start, simulating a complete deployment. The `Makefile`  can be used to build and deploy, using the environment variables listed below in a populated `.env` file to customise the backend.
+
+#### Environment variables
+
+The environment variables are as follows:
+
+```
+NOMIS_ENV               // Whether the application is in `production` or `development`
+NOMIS_DB_NAME           // The name of the database in MariaDB
+NOMIS_DB_HOSTNAME       // The hostname of the MariaDB server
+NOMIS_DB_PORT           // The port of the MariaDB server
+NOMIS_DB_USERNAME       // The username the portal uses to access MariaDB
+NOMIS_DB_PASSWORD       // The password the portal uses to access MariaDB
+
+---- Only needed if the MariaDB container is being used
+NOMIS_DB_ROOT_PASSWORD  // The root password of the MySQL container
+```
+
+Note: If using a remote database, the docker compose file should be altered to disable
+the MariaDB container and remove its dependence from the nomis portal container.
+
+
+#### Volume mapping
+
+The included `docker-compose.yml` maps the data, protocol, db_backups, and log
+folders to the local filesystem. The folders `data` and `protocols` should contain the data
+assets required to serve the the map data, and protocol PDFs within the interface, and
+the `db_backups` and `log` directories hold the database dumps and logfiles.
+
+```
+- ./data:/srv/shiny-server/data
+- ./protocols:/srv/shiny-server/www/protocols
+- ./db_backups:/srv/shiny-server/db_backups
+- ./log:/srv/shiny-server/log
+```
+
+#### Building and running
 
 ```bash
-docker compose up --build
+make run
 ```
 
 By default, the reverse proxy will start on http port 80, and listen for connections to http://nomis.local. Add this hostname as a new line to your `/etc/hosts` system file, addressing your machine's local IP (`127.0.0.1`).
@@ -33,27 +67,6 @@ By default, the reverse proxy will start on http port 80, and listen for connect
 ```
 
 You should be able to access the site at [http://nomis.local](http://nomis.local).
-
-### Docker (build and run)
-
-With the supplied `Dockerfile`, and from the root of the repository, build the image with:
-
-```bash
-docker build -t nomis-portal .
-```
-
-Then run the container, suppylying the MariaDB database to connect to with the environment variables and exposing port 3838.
-
-The environment variables are as follows:
-
-```
-NOMIS_ENV           // Whether the application is in `production` or `development`
-NOMIS_DB_NAME       // The name of the database in MariaDB
-NOMIS_DB_HOSTNAME   // The hostname of the MariaDB server
-NOMIS_DB_PORT       // The port of the MariaDB server
-NOMIS_DB_USERNAME   // The username the portal uses to access MariaDB
-NOMIS_DB_PASSWORD   // The passworrd the portal uses to access MariaDB
-```
 
 ### Ubuntu
 

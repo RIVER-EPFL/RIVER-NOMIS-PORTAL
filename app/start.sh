@@ -9,12 +9,14 @@ rm -f app_config.R
 
 # Add environment vars from env into R config. This is done
 # due to RShiny not passing system env vars to application
-printf "ENV <- '%s'\n" "$NOMIS_ENV" >> app_config.R
-printf "DB_NAME <- '%s'\n" "$NOMIS_DB_NAME" >> app_config.R
-printf "HOSTNAME <- '%s'\n" "$NOMIS_DB_HOSTNAME" >> app_config.R
-printf "DB_PORT <- %s\n" "$NOMIS_DB_PORT" >> app_config.R
-printf "USERNAME <- '%s'\n" "$NOMIS_DB_USERNAME" >> app_config.R
-printf "PASSWORD <- '%s'\n" "$NOMIS_DB_PASSWORD" >> app_config.R
+cat <<EOF > app_config.R
+ENV <- '$NOMIS_ENV'
+DB_NAME <- '$NOMIS_DB_NAME'
+HOSTNAME <- '$NOMIS_DB_HOSTNAME'
+DB_PORT <- $NOMIS_DB_PORT
+USERNAME <- '$NOMIS_DB_USERNAME'
+PASSWORD <- '$NOMIS_DB_PASSWORD'
+EOF
 
 # Run RShiny
 /usr/bin/shiny-server
