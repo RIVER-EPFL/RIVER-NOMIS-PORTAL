@@ -4,9 +4,6 @@
 # and creates a config file which is read by the application on
 # initialisation, then starts the application
 
-# Delete any existing app config file
-rm -f app_config.R
-
 # Add environment vars from env into R config. This is done
 # due to RShiny not passing system env vars to application
 cat <<EOF > app_config.R
