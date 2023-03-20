@@ -24,6 +24,7 @@ library(forcats)
 library(tidyr)
 library(magrittr)
 library(dplyr)
+library(dbplyr)
 library(DBI)
 library(pool)
 library(DT)
@@ -61,8 +62,8 @@ source('app_config.R')
 if (ENV == 'development') {
     # Compile CSS from Sass
     sass::sass(
-        sass::sass_file('assets/sass/main.scss'), 
-        output = 'www/main.css',
+        sass::sass_file('./assets/sass/main.scss'),
+        output = './www/main.css',
         options = sass::sass_options(output_style = 'compressed')
     )
     # Compile and minify JavaScript
@@ -101,7 +102,7 @@ ui <- tagList(
             id = 'main-nav',
             # Load the custom logo for the navbar title
             htmlTemplate('./html_components/logo.html'),
-            
+
             # Set a window browser window title
             windowTitle = 'NOMIS DATA PORTAL',
             # Create the home tab
@@ -120,9 +121,9 @@ ui <- tagList(
         # Add the login module UI
         loginUI('login')
         ),
-        
+
         # Add footer to navbarPageWithWrapper
-        footer = htmlTemplate('html_components/footer.html',
+        footer = htmlTemplate('./html_components/footer.html',
                               creditsLink = actionLink('credits','Credits & Source code'))
     )
 )
@@ -133,10 +134,10 @@ server <- function(input, output, session) {
      user <- callModule(login, 'login', pool)
     dimension <- reactive({input$dimension})
 
-    
+
     observeEvent(user$role, {
-        
-        
+
+
         if(user$role %in% c('sber', 'admin','intern')){
             appendTab(
                 'main-nav',
@@ -148,7 +149,7 @@ server <- function(input, output, session) {
                 )
             )
             callModule(visualisationTab,"visualisation",pool)
-            
+
             appendTab(
                 'main-nav',
                 tabPanel(
@@ -157,9 +158,9 @@ server <- function(input, output, session) {
                     progressTabUI('progress')
                 )
             )
-            
+
             callModule(progressTab,"progress",pool)
-            
+
             appendTab(
                 'main-nav',
                 # Create the visualisation tab
@@ -171,7 +172,7 @@ server <- function(input, output, session) {
             )
             callModule(protocolsTab,"protocols",pool)
         }
-        
+
         if (user$role %in% c('sber', 'admin')) {
             appendTab(
                 'main-nav',
@@ -183,7 +184,7 @@ server <- function(input, output, session) {
                     uploadTabUI('upload',pool)
                 )
             )
-            
+
             callModule(uploadTab,"upload",pool,dimension)
             ## Generate dataManagementTab #################################################
             # Create the data management tab
@@ -198,7 +199,7 @@ server <- function(input, output, session) {
             )
             # Load data management server logic
             callModule(managementTab,"management",pool,dimension)
-            
+
         }
         if (user$role %in% c('sber', 'admin','intern')) {
 
@@ -215,7 +216,7 @@ server <- function(input, output, session) {
             )
             callModule(downloadTab,"download",pool)
         }
-        
+
         if (user$role == 'admin') {
             ## Generate usersTab ##########################################################
             # Create users tab
@@ -232,7 +233,7 @@ server <- function(input, output, session) {
             callModule(portalTab, 'portal', pool)
         }
     })
-    
+
     observeEvent(input$credits, ignoreInit = TRUE, {
         showModal(modalDialog(
             htmlTemplate(
@@ -246,7 +247,7 @@ server <- function(input, output, session) {
 
 shinyApp(ui, server, onStart = function() {
     cat("Doing application setup\n")
-    
+
     onStop(function() {
         cat("Doing application cleanup\n")
         poolClose(pool)

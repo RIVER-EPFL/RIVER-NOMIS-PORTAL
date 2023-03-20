@@ -1,66 +1,91 @@
-# SBER NOMIS Portal
+# NOMIS Portal
 
 This Shiny app is meant to provide an easy interface for the NOMIS researchers to interact with their data. It can also be used as a data sharing portal accessible via the Web if wanted.
 
-## Dependecies
+## Dependencies
 
-Main dependencies:
-- R version 4.0.3
+Core dependencies and installation steps are defined in the `Dockerfile` assuming a Ubuntu installation.
+
+- R version 4.2.2
 - Node.js (tested version: 12.18.3)
 - Terser.js (tested version: 5.3.0)
 
-R packages:
-- RMySQL_0.10.20
-- sodium_1.1
-- purrr_0.3.4
-- readr_1.4.0
-- sass_0.2.0
-- rhandsontable_0.3.7
-- DT_0.16
-- pool_0.1.5
-- DBI_1.1.0
-- dplyr_1.0.2
-- magrittr_1.5
-- tidyr_1.1.2
-- forcats_0.5.0
-- lubridate_1.7.9
-- data.table_1.13.2
-- Cairo_1.5-12.2
-- ggplot2_3.3.2
-- stringr_1.4.0
-- jsonlite_1.7.1
-- shinycssloaders_1.0.0
-- shinybusy_0.2.2
-- shinyWidgets_0.5.4
-- shinyjs_2.0.0
-- shiny_1.5.0
-- lambda.r_1.2.4
-- rlist_0.4.6.1
-- formattable_0.2.0.1
-- DataCombine_0.2.21
-- staRdom_1.1.14
-- kableExtra_1.3.1          
-- zip_2.1.1
-- xlsx_0.5.6
-- waiter_0.1.3
-- hrbrthemes_0.8.0          
+`renv` is used to manage package versions.
 
-## Installation
+## Getting started
 
-### R and Rstudio
+### Docker Compose
+
+Using the supplied `docker-compose.yml` file, a nomis portal, MariaDB database and Traefik reverse proxy will start, simulating a complete deployment. The `Makefile`  can be used to build and deploy, using the environment variables listed below in a populated `.env` file to customise the backend.
+
+#### Environment variables
+
+The environment variables are as follows:
+
+```
+NOMIS_ENV               // Whether the application is in `production` or `development`
+NOMIS_DB_NAME           // The name of the database in MariaDB
+NOMIS_DB_HOSTNAME       // The hostname of the MariaDB server
+NOMIS_DB_PORT           // The port of the MariaDB server
+NOMIS_DB_USERNAME       // The username the portal uses to access MariaDB
+NOMIS_DB_PASSWORD       // The password the portal uses to access MariaDB
+
+---- Only needed if the MariaDB container is being used
+NOMIS_DB_ROOT_PASSWORD  // The root password of the MySQL container
+```
+
+Note: If using a remote database, the docker compose file should be altered to disable
+the MariaDB container and remove its dependence from the nomis portal container.
+
+
+#### Volume mapping
+
+The included `docker-compose.yml` maps the data, protocol, db_backups, and log
+folders to the local filesystem. The folders `data` and `protocols` should contain the data
+assets required to serve the the map data, and protocol PDFs within the interface, and
+the `db_backups` and `log` directories hold the database dumps and logfiles.
+
+```
+- ./data:/srv/shiny-server/data
+- ./protocols:/srv/shiny-server/www/protocols
+- ./db_backups:/srv/shiny-server/db_backups
+- ./log:/srv/shiny-server/log
+```
+
+#### Building and running
+
+```bash
+make run
+```
+
+By default, the reverse proxy will start on http port 80, and listen for connections to http://nomis.local. Add this hostname as a new line to your `/etc/hosts` system file, addressing your machine's local IP (`127.0.0.1`).
+
+```bash
+# Static table lookup for hostnames.
+
+127.0.0.1 nomis.local
+```
+
+You should be able to access the site at [http://nomis.local](http://nomis.local).
+
+### Ubuntu
+
+The `Dockerfile` is built upon a Ubuntu image, therefore the installation steps for all dependencies can be follow from the instructions defined within.
+
+#### R and Rstudio
 You need to install R and we recommend to use Rstudio as well. You can get the latest version of R or the recommend version forthis app on the CRAN website https://cran.r-project.org/ and Rstutio from their website https://rstudio.com/products/rstudio/download/.
 
-### Node and Terser
+#### Node and Terser
 To be able to parse and minify the cusom JavaScript files you will need to install Node.js and Terser.js as well.
 
-To install Node please refer yourselfe to the documentation https://nodejs.org/en/download/.
+To install Node please refer yourself to the documentation https://nodejs.org/en/download/.
 
 Terser.js will need to be install globally to be accessible by the app. Once Node is installed run the following command:
 ```sh
 npm install terser -g
 ```
 
-## App oraganisation
+## App organisation
 
 ### App.R
 The main app script is the `App.R` file. It contains the basic app structure and logic to create and operate the main tabs and the initialization tasks.
@@ -102,6 +127,8 @@ The `js` directory contains all the _JavaScript_ code organized in different fil
 
 #### app_config.R
 A `app_config.R` file **is required** and should contains all sensible information, such as DB name or password. These information are saved in environment variables when the file is sourced during the app startup. More info at https://github.com/ninojeannet/SBER-NOMIS-PORTAL/wiki/Deployment
+
+**Note**: In a Docker deployment, environment variables are used. Refer to the Docker usage instructions.
 
 #### packages_installation.R
 The `packages_installation.R` file contains instructions to install the _R_ packages with the correct version. To install them, just run the script file.
