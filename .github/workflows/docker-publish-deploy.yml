@@ -95,5 +95,5 @@ jobs:
       - uses: EPFL-ENAC/epfl-enac-deploy-action@main
         with:
           ENAC_IT4R_CD_environment: "test"
-          ENAC_IT4R_CD_deployment_id: "metalp-data-test.epfl.ch"
+          ENAC_IT4R_CD_deployment_id: ${{ secrets.DEPLOYMENT_TEST_ID }}
           ENAC_IT4R_CD_deployment_secret: ${{ secrets.DEPLOYMENT_TEST_SECRET }}
